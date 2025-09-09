@@ -25,7 +25,7 @@ import { auhtApi, useLogoutMutation } from "@/redux/features/auth/auth.api";
 import { useGetMeQuery } from "@/redux/features/user/user.api";
 import { useAppDispatch } from "@/redux/hooks";
 import { ChevronDown } from "lucide-react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router";
+import { Link, NavLink, useLocation } from "react-router";
 import { toast } from "sonner";
 
 // Navigation links array to be used in both desktop and mobile menus
@@ -40,7 +40,6 @@ const Navbar = () => {
   const { data: user } = useGetMeQuery(undefined);
   const [logout, { isLoading: logoutLoading }] = useLogoutMutation();
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const handleLogout = async () => {
@@ -50,7 +49,7 @@ const Navbar = () => {
       if (result.success) {
         toast.success(result.message, { id: toastId });
         dispatch(auhtApi.util.resetApiState());
-        navigate("/");
+        // navigate("/");
       }
     } catch (error) {
       console.log(error);

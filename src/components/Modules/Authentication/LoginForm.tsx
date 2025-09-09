@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 import PasswordField from "./PasswordField";
@@ -34,7 +34,11 @@ export const LoginForm = ({
 }: React.HTMLAttributes<HTMLDivElement>) => {
   const [login, isLoading] = useLoginMutation();
   const location = useLocation();
+
+  // Navigation
   const navigate = useNavigate();
+  const [search] = useSearchParams();
+  const redirect = search.get("redirect") || "/";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,7 +54,7 @@ export const LoginForm = ({
     try {
       const result = await login(data).unwrap();
       toast.success(result.message, { id: toastId });
-      navigate(location.state?.path || "/");
+      navigate(redirect);
     } catch (error) {
       console.log(error as any);
       toast.error(
@@ -156,9 +160,7 @@ export const LoginForm = ({
                 {/* google */}
                 <Button
                   onClick={() =>
-                    (window.location.href = `${
-                      config.baseUrl
-                    }/auth/google?redirect=${location.state?.path || "/"}`)
+                    (window.location.href = `${config.baseUrl}/auth/google?redirect=${redirect}`)
                   }
                   variant="outline"
                   type="button"
@@ -178,9 +180,8 @@ export const LoginForm = ({
               <div className="text-center text-sm *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4">
                 Don&apos;t have an account?{" "}
                 <Link
-                  to={"/register"}
+                  to={`/register?redirect=${encodeURIComponent(redirect)}`}
                   className="underline underline-offset-4"
-                  state={{ path: location.state?.path }}
                 >
                   Register
                 </Link>

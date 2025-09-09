@@ -1,4 +1,7 @@
+import register_img from "@/assets/images/login-logo.jpg";
+import AvatarUpload from "@/components/Layouts/Shared/AvaterUpload";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -12,18 +15,15 @@ import { Input } from "@/components/ui/input";
 import { config } from "@/configs";
 import { cn } from "@/lib/utils";
 import { useRegisterUserMutation } from "@/redux/features/auth/auth.api";
+import type { IImageUpload } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Home } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 import PasswordField from "./PasswordField";
-import { Home } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import register_img from "@/assets/images/login-logo.jpg";
-import { useState } from "react";
-import type { IImageUpload } from "@/types";
-import AvatarUpload from "@/components/Layouts/Shared/AvaterUpload";
 
 const registerSchema = z
   .object({
@@ -42,8 +42,11 @@ export const RegistretionForm = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => {
   const [register, isLoding] = useRegisterUserMutation();
-  const location = useLocation();
+
+  // Navigation
   const navigate = useNavigate();
+  const [search] = useSearchParams();
+  const redirect = search.get("redirect") || "/";
 
   const [picture, SetPicture] = useState<IImageUpload>(null);
 
@@ -78,7 +81,7 @@ export const RegistretionForm = ({
       const result = await register(formData).unwrap();
       toast.success(result.message, { id: toastId });
       navigate("/login", {
-        state: { email: data.email, path: location.state?.path },
+        state: { email: data.email },
       });
     } catch (error) {
       toast.error(
@@ -204,9 +207,7 @@ export const RegistretionForm = ({
                 {/* google */}
                 <Button
                   onClick={() =>
-                    (window.location.href = `${
-                      config.baseUrl
-                    }/auth/google?redirect=${location.state?.path || "/"}`)
+                    (window.location.href = `${config.baseUrl}/auth/google?redirect=${redirect}`)
                   }
                   variant="outline"
                   type="button"
@@ -226,9 +227,8 @@ export const RegistretionForm = ({
               <div className="text-center text-sm *:[a]:hover:text-primary *:[a]:underline *:[a]:underline-offset-4">
                 Don&apos;t have an account?
                 <Link
-                  to={"/login"}
+                  to={`/login?redirect=${encodeURIComponent(redirect)}`}
                   className="underline underline-offset-4"
-                  state={{ path: location.state?.path }}
                 >
                   Login
                 </Link>

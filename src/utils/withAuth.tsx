@@ -1,3 +1,4 @@
+import { SkeletonCard } from "@/components/Layouts/Shared/skeletonCard";
 import { useGetMeQuery } from "@/redux/features/user/user.api";
 import type { IRole } from "@/types";
 import type { ComponentType } from "react";
@@ -8,8 +9,14 @@ export const withAuth = (Component: ComponentType, requiredRole?: IRole[]) => {
     const location = useLocation();
     const { data, isLoading } = useGetMeQuery(undefined);
 
+    if (isLoading) return <SkeletonCard />;
+
     if (!isLoading && !data?.data?.email) {
-      return <Navigate to={"/login"} state={{ path: location.pathname }} />;
+      return (
+        <Navigate
+          to={`/login?redirect=${encodeURIComponent(location.pathname)}`}
+        />
+      );
     }
 
     if (
